@@ -20,5 +20,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
+      # PageProps/LayoutProps are ambient types Next generates (next dev/build/typegen);
+      # the generated output isn't committed, so typecheck needs this first
+      - run: npx next typegen
       - run: npm run typecheck
       - run: npm run build
