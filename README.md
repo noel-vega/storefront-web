@@ -1,36 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# storefront-web
 
-## Getting Started
+A minimal reference storefront built on [`@ordersail/storefront-sdk`](https://www.npmjs.com/package/@ordersail/storefront-sdk) — [OrderSail](https://ordersail.com)'s public storefront API. This is **not** a product OrderSail hosts for every merchant: a merchant signs up, gets an app key + this SDK, and forks/hosts their own storefront. This repo is the worked example of doing that.
 
-First, run the development server:
+Covers the core commerce loop: product listing, product detail, cart, and Stripe Embedded Checkout. It doesn't cover customer accounts, order history, or theming — those are left for you to build (or check the SDK's own repo for what's coming next on the platform side).
+
+## Getting started
 
 ```bash
+npm install
+cp .env.example .env.local   # fill in your app key + Stripe publishable key
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+See `.env.example`. You need:
 
-## Learn More
+- `NEXT_PUBLIC_STOREFRONT_API_URL` — the storefront-api instance to talk to.
+- `NEXT_PUBLIC_APP_KEY` — an account-scoped app key (Settings → Developer API keys in merchant-web). This is a publishable-style key, safe to ship in client code — see the SDK's README for why.
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` — your platform's Stripe test-mode publishable key.
 
-To learn more about Next.js, take a look at the following resources:
+### CORS
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+`storefront-api` only allows requests from origins an account has explicitly registered. Register wherever you're running this (e.g. `http://localhost:3000` for local dev) via the merchant-api storefront-origins endpoint before cart/checkout calls from the browser will work.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Structure
 
-## Deploy on Vercel
+- `src/app/page.tsx` — product listing (Server Component; calls storefront-api server-to-server, no CORS involved).
+- `src/app/products/[id]/page.tsx` — product detail + variant picker.
+- `src/app/cart/page.tsx` — cart contents, quantity/remove/clear (Client Component; calls storefront-api directly from the browser).
+- `src/app/checkout/page.tsx` — Stripe Embedded Checkout.
+- `src/app/checkout/return/page.tsx` — post-checkout status.
+- `src/lib/storefront.ts` — `StorefrontClient` factory.
+- `src/lib/cart-token.ts` — persists the cart token to `localStorage` across page loads.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Learn more
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [`@ordersail/storefront-sdk` README](https://github.com/noel-vega/ordersail/tree/main/packages/storefront-sdk) — full resource reference, error-handling model, auth model.
+- [Next.js documentation](https://nextjs.org/docs).
