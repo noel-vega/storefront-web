@@ -15,18 +15,19 @@ type Config = { ready: boolean; stripeAccountId: string | null; cartEmpty: boole
 
 export default function CheckoutPage() {
   const [config, setConfig] = useState<Config | null>(null);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     const storefront = createStorefrontClient(getStoredCartToken());
-    Promise.all([storefront.checkout.getConfig(), storefront.cart.get()]).then(
-      ([checkoutConfig, cart]) => {
+    Promise.all([storefront.checkout.getConfig(), storefront.cart.get()])
+      .then(([checkoutConfig, cart]) => {
         setConfig({
           ready: checkoutConfig?.ready ?? false,
           stripeAccountId: checkoutConfig?.stripeAccountId ?? null,
           cartEmpty: !cart || cart.items.length === 0,
         });
-      },
-    );
+      })
+      .catch(() => setLoadError(true));
   }, []);
 
   // scopes Stripe.js to this storefront's connected account — same
@@ -80,6 +81,23 @@ export default function CheckoutPage() {
     },
     [],
   );
+
+  if (loadError) {
+    return (
+      <div className="mx-auto max-w-3xl px-6 py-12 text-center">
+        <h1 className="text-2xl font-medium">Couldn&apos;t load checkout</h1>
+        <p className="mt-2 text-sm text-black/60 dark:text-white/60">
+          Something went wrong — try refreshing the page.
+        </p>
+        <Link
+          href="/cart"
+          className="mt-4 inline-block text-sm text-black/60 hover:underline dark:text-white/60"
+        >
+          ← Back to cart
+        </Link>
+      </div>
+    );
+  }
 
   if (!config) {
     return (
