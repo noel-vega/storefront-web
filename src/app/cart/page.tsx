@@ -9,11 +9,18 @@ import { formatPrice } from "@/lib/format";
 
 export default function CartPage() {
   const [cart, setCart] = useState<Cart | null | undefined>(undefined);
+  const [loadError, setLoadError] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
-    const storefront = createStorefrontClient(getStoredCartToken());
-    const result = await storefront.cart.get();
-    setCart(result ?? null);
+    try {
+      const storefront = createStorefrontClient(getStoredCartToken());
+      const result = await storefront.cart.get();
+      setCart(result ?? null);
+      setLoadError(false);
+    } catch {
+      setLoadError(true);
+    }
   }, []);
 
   useEffect(() => {
@@ -22,6 +29,9 @@ export default function CartPage() {
       .cart.get()
       .then((result) => {
         if (!ignore) setCart(result ?? null);
+      })
+      .catch(() => {
+        if (!ignore) setLoadError(true);
       });
     return () => {
       ignore = true;
@@ -29,27 +39,48 @@ export default function CartPage() {
   }, []);
 
   async function updateQuantity(variantId: number, quantity: number) {
-    const storefront = createStorefrontClient(getStoredCartToken());
-    if (quantity <= 0) {
-      await storefront.cart.removeItem(variantId);
-    } else {
-      await storefront.cart.updateItem(variantId, { quantity });
+    setActionError(null);
+    try {
+      const storefront = createStorefrontClient(getStoredCartToken());
+      if (quantity <= 0) {
+        await storefront.cart.removeItem(variantId);
+      } else {
+        await storefront.cart.updateItem(variantId, { quantity });
+      }
+      setStoredCartToken(storefront.cartToken);
+      await refresh();
+    } catch {
+      setActionError("Couldn't update your cart — try again.");
     }
-    setStoredCartToken(storefront.cartToken);
-    refresh();
   }
 
   async function clear() {
-    const storefront = createStorefrontClient(getStoredCartToken());
-    await storefront.cart.clear();
-    setStoredCartToken(storefront.cartToken);
-    refresh();
+    setActionError(null);
+    try {
+      const storefront = createStorefrontClient(getStoredCartToken());
+      await storefront.cart.clear();
+      setStoredCartToken(storefront.cartToken);
+      await refresh();
+    } catch {
+      setActionError("Couldn't clear your cart — try again.");
+    }
   }
 
-  if (cart === undefined) {
+  if (cart === undefined && !loadError) {
     return (
       <div className="mx-auto max-w-3xl px-6 py-12 text-center text-sm text-black/60 dark:text-white/60">
         Loading…
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="mx-auto max-w-3xl px-6 py-12 text-center">
+        <h1 className="text-2xl font-medium">Couldn&apos;t load your cart</h1>
+        <p className="mt-2 text-sm text-black/60 dark:text-white/60">
+          Something went wrong — try refreshing the page.
+        </p>
       </div>
     );
   }
@@ -71,6 +102,9 @@ export default function CartPage() {
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">
       <h1 className="text-2xl font-medium">Cart</h1>
+      {actionError ? (
+        <p className="mt-2 text-sm text-red-600">{actionError}</p>
+      ) : null}
       <ul className="mt-8 divide-y divide-black/10 dark:divide-white/15">
         {cart.items.map((item) => (
           <li key={item.variantId} className="flex items-center gap-4 py-4">
