@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
+import { AccountNavLink } from "@/components/account-nav-link";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -30,12 +31,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <Link href="/" className="font-medium">
               Storefront
             </Link>
-            <Link
-              href="/cart"
-              className="text-sm text-black/60 hover:underline dark:text-white/60"
-            >
-              Cart
-            </Link>
+            <div className="flex items-center gap-6">
+              <AccountNavLink />
+              <Link
+                href="/cart"
+                className="text-sm text-black/60 hover:underline dark:text-white/60"
+              >
+                Cart
+              </Link>
+            </div>
           </div>
         </header>
         <main className="flex-1">{children}</main>
