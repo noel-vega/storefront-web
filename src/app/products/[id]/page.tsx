@@ -45,9 +45,45 @@ export default async function ProductDetailPage(
   if (!product) notFound();
 
   const image = product.images[0];
+  const prices = product.variants.map((v) => v.priceCents);
+  const minPrice = Math.min(...prices);
+  const maxPrice = Math.max(...prices);
+  const inStock = product.variants.some((v) => v.stock > 0);
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description ?? undefined,
+    image: product.images.map((i) => i.url),
+    offers:
+      minPrice === maxPrice
+        ? {
+            "@type": "Offer",
+            priceCurrency: "USD",
+            price: (minPrice / 100).toFixed(2),
+            availability: inStock
+              ? "https://schema.org/InStock"
+              : "https://schema.org/OutOfStock",
+          }
+        : {
+            "@type": "AggregateOffer",
+            priceCurrency: "USD",
+            lowPrice: (minPrice / 100).toFixed(2),
+            highPrice: (maxPrice / 100).toFixed(2),
+            offerCount: product.variants.length,
+            availability: inStock
+              ? "https://schema.org/InStock"
+              : "https://schema.org/OutOfStock",
+          },
+  };
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="aspect-square overflow-hidden rounded-lg bg-black/5 dark:bg-white/10">
         {image ? (
           // eslint-disable-next-line @next/next/no-img-element
