@@ -1,6 +1,7 @@
-import Link from "next/link";
 import { createStorefrontClient } from "@/lib/storefront";
-import { formatPrice } from "@/lib/format";
+import { firstValue } from "@/lib/search-params";
+import { ProductCard } from "@/components/product-card";
+import { PaginationNav } from "@/components/pagination-nav";
 
 // Catalog data is per-tenant and live, not knowable at build time — force
 // dynamic rendering instead of the static prerender Next would otherwise
@@ -31,10 +32,6 @@ const SORT_LABELS: Record<string, string> = {
   "name-asc": "Name: A to Z",
   "name-desc": "Name: Z to A",
 };
-
-function firstValue(value: string | string[] | undefined): string | undefined {
-  return Array.isArray(value) ? value[0] : value;
-}
 
 // Dollars (what the price inputs show) to cents (what the API takes).
 // Invalid/blank input is treated as "no bound", not zero.
@@ -258,53 +255,14 @@ export default async function HomePage(props: PageProps<"/">) {
         <>
           <ul className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3">
             {products.items.map((product) => (
-              <li key={product.id}>
-                <Link href={`/products/${product.id}`} className="block">
-                  <div className="aspect-square overflow-hidden rounded-lg bg-black/5 dark:bg-white/10">
-                    {product.thumbnailUrl ? (
-                      // external, per-tenant images — no next.config.js remotePatterns to maintain here
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={product.thumbnailUrl}
-                        alt={product.name}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : null}
-                  </div>
-                  <p className="mt-2 text-sm font-medium">{product.name}</p>
-                  <p className="text-sm text-black/60 dark:text-white/60">
-                    {product.minPriceCents !== null
-                      ? formatPrice(product.minPriceCents)
-                      : "—"}
-                  </p>
-                </Link>
-              </li>
+              <ProductCard key={product.id} product={product} />
             ))}
           </ul>
-
-          {totalPages > 1 ? (
-            <nav className="mt-10 flex items-center justify-center gap-4 text-sm">
-              {page > 1 ? (
-                <Link href={pageHref(page - 1, filters)} className="underline">
-                  Previous
-                </Link>
-              ) : (
-                <span className="text-black/30 dark:text-white/30">
-                  Previous
-                </span>
-              )}
-              <span className="text-black/60 dark:text-white/60">
-                Page {page} of {totalPages}
-              </span>
-              {page < totalPages ? (
-                <Link href={pageHref(page + 1, filters)} className="underline">
-                  Next
-                </Link>
-              ) : (
-                <span className="text-black/30 dark:text-white/30">Next</span>
-              )}
-            </nav>
-          ) : null}
+          <PaginationNav
+            page={page}
+            totalPages={totalPages}
+            buildHref={(p) => pageHref(p, filters)}
+          />
         </>
       )}
     </div>
