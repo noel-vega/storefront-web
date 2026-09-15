@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NEXT_PUBLIC_STOREFRONT_API_URL: http://localhost:3001
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
       NEXT_PUBLIC_APP_KEY: sfk_ci_placeholder
       NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_ci_placeholder
     steps:
