@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createStorefrontClient } from "@/lib/storefront";
 import { firstValue } from "@/lib/search-params";
@@ -8,6 +9,27 @@ import { PaginationNav } from "@/components/pagination-nav";
 export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 20;
+
+export async function generateMetadata(
+  props: PageProps<"/categories/[id]">,
+): Promise<Metadata> {
+  const { id } = await props.params;
+  const storefront = createStorefrontClient();
+  const category = await storefront.categories.getById(Number(id));
+
+  if (!category) return {};
+
+  const title = category.name;
+  const description = `Shop ${category.name} at Storefront.`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: `/categories/${id}` },
+    openGraph: { title, description },
+    twitter: { card: "summary", title, description },
+  };
+}
 
 export default async function CategoryPage(
   props: PageProps<"/categories/[id]">,

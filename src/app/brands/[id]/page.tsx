@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createStorefrontClient } from "@/lib/storefront";
 import { firstValue } from "@/lib/search-params";
@@ -8,6 +9,27 @@ import { PaginationNav } from "@/components/pagination-nav";
 export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 20;
+
+export async function generateMetadata(
+  props: PageProps<"/brands/[id]">,
+): Promise<Metadata> {
+  const { id } = await props.params;
+  const storefront = createStorefrontClient();
+  const brand = await storefront.brands.getById(Number(id));
+
+  if (!brand) return {};
+
+  const title = brand.name;
+  const description = `Shop ${brand.name} at Storefront.`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: `/brands/${id}` },
+    openGraph: { title, description },
+    twitter: { card: "summary", title, description },
+  };
+}
 
 export default async function BrandPage(props: PageProps<"/brands/[id]">) {
   const { id } = await props.params;
