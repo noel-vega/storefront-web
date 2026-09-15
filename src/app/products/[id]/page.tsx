@@ -1,9 +1,39 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createStorefrontClient } from "@/lib/storefront";
 import { VariantPicker } from "@/components/variant-picker";
 
 // per-tenant, live data — see src/app/page.tsx
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata(
+  props: PageProps<"/products/[id]">,
+): Promise<Metadata> {
+  const { id } = await props.params;
+  const storefront = createStorefrontClient();
+  const product = await storefront.products.getById(Number(id));
+
+  if (!product) return {};
+
+  const image = product.images[0]?.url;
+  const description = product.description ?? undefined;
+
+  return {
+    title: product.name,
+    description,
+    openGraph: {
+      title: product.name,
+      description,
+      images: image ? [image] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.name,
+      description,
+      images: image ? [image] : undefined,
+    },
+  };
+}
 
 export default async function ProductDetailPage(
   props: PageProps<"/products/[id]">,
