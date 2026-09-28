@@ -6,7 +6,9 @@ import { formatPrice } from "@/lib/format";
 import {
   formatOrderDate,
   orderStatusLabel,
+  safeTrackingUrl,
   type OrderDetail,
+  type OrderFulfillment,
 } from "@/lib/orders";
 import { useSignedInRequest } from "@/lib/use-signed-in-request";
 
@@ -97,6 +99,23 @@ function OrderDetailContent({ order }: { order: OrderDetail }) {
         </dl>
       </section>
 
+      {order.fulfillments.length > 0 ? (
+        <section className="mt-8">
+          <h2 className="text-sm font-medium">
+            {order.fulfillments.length === 1 ? "Shipment" : "Shipments"}
+          </h2>
+          <ul className="mt-2 space-y-3">
+            {order.fulfillments.map((fulfillment) => (
+              <Shipment
+                key={fulfillment.id}
+                fulfillment={fulfillment}
+                items={order.items}
+              />
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       {order.shipping ? (
         <section className="mt-8">
           <h2 className="text-sm font-medium">Shipping to</h2>
@@ -114,6 +133,68 @@ function OrderDetailContent({ order }: { order: OrderDetail }) {
         </section>
       ) : null}
     </div>
+  );
+}
+
+function Shipment({
+  fulfillment,
+  items,
+}: {
+  fulfillment: OrderFulfillment;
+  items: OrderDetail["items"];
+}) {
+  const trackingUrl = safeTrackingUrl(fulfillment.trackingUrl);
+  const carrier = [
+    fulfillment.shippingCarrier,
+    fulfillment.shippingServiceLevel,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  const productName = (orderItemId: number) =>
+    items.find((item) => item.id === orderItemId)?.productName ?? "Item";
+
+  return (
+    <li className="rounded-lg border border-black/10 p-4 dark:border-white/15">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <p className="text-sm font-medium">{carrier || "Shipped"}</p>
+        <p className={mutedText}>{formatOrderDate(fulfillment.createdAt)}</p>
+      </div>
+      {fulfillment.trackingNumber ? (
+        <p className={`mt-1 ${mutedText}`}>
+          Tracking{" "}
+          {trackingUrl ? (
+            <a
+              href={trackingUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-foreground underline"
+            >
+              {fulfillment.trackingNumber}
+            </a>
+          ) : (
+            <span className="font-mono">{fulfillment.trackingNumber}</span>
+          )}
+        </p>
+      ) : trackingUrl ? (
+        <a
+          href={trackingUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-1 inline-block text-sm underline"
+        >
+          Track package
+        </a>
+      ) : null}
+      {fulfillment.items.length > 0 ? (
+        <ul className={`mt-2 ${mutedText}`}>
+          {fulfillment.items.map((line) => (
+            <li key={line.orderItemId}>
+              {productName(line.orderItemId)} × {line.quantity}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </li>
   );
 }
 
