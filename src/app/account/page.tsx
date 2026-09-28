@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Customer } from "@ordersail/storefront-sdk";
-import { createStorefrontClient } from "@/lib/storefront";
-import { getStoredCartToken } from "@/lib/cart-token";
+import { getStorefrontClient } from "@/lib/storefront";
 
 export default function AccountPage() {
   const router = useRouter();
@@ -20,25 +19,16 @@ export default function AccountPage() {
   >("idle");
   const [signingOut, setSigningOut] = useState(false);
 
-  // The initial customer.get() can consume-and-rotate the stored refresh
-  // token (a 401 triggers the SDK's auto-refresh). Refresh tokens are
-  // single-use (OS-457): a second concurrent call presenting the same
-  // stored token gets treated as reuse and revokes the whole session — not
-  // a hypothetical, this is exactly what React StrictMode's dev-mode
-  // double-invocation of effects triggers. This ref guard stops the actual
-  // network call from ever firing twice, so there's never more than one
-  // in-flight request to race against itself — deliberately no `ignore`
-  // flag alongside it: StrictMode's synthetic unmount would set it before
-  // the one real request resolves, discarding a legitimate result.
-  const hasFetchedRef = useRef(false);
-
+  // Safe to run twice (StrictMode's double-invoked effect): the tab shares
+  // one client, and the SDK shares its token refresh between concurrent
+  // calls — see getStorefrontClient.
   useEffect(() => {
-    if (hasFetchedRef.current) return;
-    hasFetchedRef.current = true;
+    let cancelled = false;
 
-    createStorefrontClient()
+    getStorefrontClient()
       .customer.get()
       .then((result) => {
+        if (cancelled) return;
         // not currently signed in (no restored refresh token, or it's
         // expired/revoked) — nothing to show here
         if (!result) {
@@ -50,14 +40,20 @@ export default function AccountPage() {
         setLastName(result.lastName);
         setEmail(result.email);
       })
-      .catch(() => setLoadError(true));
+      .catch(() => {
+        if (!cancelled) setLoadError(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [router]);
 
   async function handleSave(event: FormEvent) {
     event.preventDefault();
     setSaveStatus("saving");
     try {
-      const storefront = createStorefrontClient();
+      const storefront = getStorefrontClient();
       const updated = await storefront.customer.update({
         firstName,
         lastName,
@@ -72,7 +68,7 @@ export default function AccountPage() {
 
   async function handleSignOut() {
     setSigningOut(true);
-    const storefront = createStorefrontClient(getStoredCartToken());
+    const storefront = getStorefrontClient();
     await storefront.logout();
     router.push("/");
   }

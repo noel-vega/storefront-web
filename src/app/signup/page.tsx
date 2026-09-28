@@ -4,8 +4,8 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ApiError } from "@ordersail/storefront-sdk";
-import { createStorefrontClient } from "@/lib/storefront";
-import { getStoredCartToken, setStoredCartToken } from "@/lib/cart-token";
+import { getStorefrontClient } from "@/lib/storefront";
+import { setStoredCartToken } from "@/lib/cart-token";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -22,7 +22,7 @@ export default function SignUpPage() {
     event.preventDefault();
     setStatus("submitting");
     try {
-      const storefront = createStorefrontClient(getStoredCartToken());
+      const storefront = getStorefrontClient();
       await storefront.signUp({ firstName, lastName, email, password });
       setStoredCartToken(storefront.cartToken);
       router.push("/account");

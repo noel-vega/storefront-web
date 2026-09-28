@@ -1,9 +1,9 @@
-import type { createStorefrontClient } from "@/lib/storefront";
+import type { getStorefrontClient } from "@/lib/storefront";
 
 // The SDK doesn't export named order types yet, so derive them from the
 // methods that return them.
 type OrdersResource = ReturnType<
-  typeof createStorefrontClient
+  typeof getStorefrontClient
 >["customer"]["orders"];
 
 export type OrderSummary = Awaited<
