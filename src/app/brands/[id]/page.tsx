@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { createStorefrontClient } from "@/lib/storefront";
+import { getStorefrontClient } from "@/lib/storefront";
 import { firstValue } from "@/lib/search-params";
 import { ProductCard } from "@/components/product-card";
 import { PaginationNav } from "@/components/pagination-nav";
@@ -14,7 +14,7 @@ export async function generateMetadata(
   props: PageProps<"/brands/[id]">,
 ): Promise<Metadata> {
   const { id } = await props.params;
-  const storefront = createStorefrontClient();
+  const storefront = getStorefrontClient();
   const brand = await storefront.brands.getById(Number(id));
 
   if (!brand) return {};
@@ -37,7 +37,7 @@ export default async function BrandPage(props: PageProps<"/brands/[id]">) {
   const page = Math.max(1, Number(firstValue(searchParams.page)) || 1);
   const offset = (page - 1) * PAGE_SIZE;
 
-  const storefront = createStorefrontClient();
+  const storefront = getStorefrontClient();
   const brand = await storefront.brands.getById(Number(id), {
     limit: PAGE_SIZE,
     offset,
