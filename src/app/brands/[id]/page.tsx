@@ -5,7 +5,7 @@ import { firstValue } from "@/lib/search-params";
 import { ProductCard } from "@/components/product-card";
 import { PaginationNav } from "@/components/pagination-nav";
 
-// per-tenant, live data — see src/app/page.tsx
+// per-tenant, live data — see src/app/(catalog)/page.tsx
 export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 20;
