@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Customer } from "@ordersail/storefront-sdk";
 import { createStorefrontClient } from "@/lib/storefront";
@@ -100,6 +101,12 @@ export default function AccountPage() {
   return (
     <div className="mx-auto max-w-sm px-6 py-12">
       <h1 className="text-2xl font-medium">Your account</h1>
+      <Link
+        href="/account/orders"
+        className="mt-2 inline-block text-sm underline"
+      >
+        Order history
+      </Link>
       <form onSubmit={handleSave} className="mt-8 space-y-4">
         <div className="flex gap-3">
           <input
