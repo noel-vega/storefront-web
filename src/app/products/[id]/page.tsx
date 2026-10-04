@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { createStorefrontClient } from "@/lib/storefront";
 import { VariantPicker } from "@/components/variant-picker";
 
-// per-tenant, live data — see src/app/page.tsx
+// per-tenant, live data — see src/app/(catalog)/page.tsx
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(
