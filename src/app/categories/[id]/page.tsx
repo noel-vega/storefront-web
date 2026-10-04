@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { createStorefrontClient } from "@/lib/storefront";
+import { getStorefrontClient } from "@/lib/storefront";
 import { firstValue } from "@/lib/search-params";
 import { ProductCard } from "@/components/product-card";
 import { PaginationNav } from "@/components/pagination-nav";
 
-// per-tenant, live data — see src/app/page.tsx
+// per-tenant, live data — see src/app/(catalog)/page.tsx
 export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 20;
@@ -14,7 +14,7 @@ export async function generateMetadata(
   props: PageProps<"/categories/[id]">,
 ): Promise<Metadata> {
   const { id } = await props.params;
-  const storefront = createStorefrontClient();
+  const storefront = getStorefrontClient();
   const category = await storefront.categories.getById(Number(id));
 
   if (!category) return {};
@@ -39,7 +39,7 @@ export default async function CategoryPage(
   const page = Math.max(1, Number(firstValue(searchParams.page)) || 1);
   const offset = (page - 1) * PAGE_SIZE;
 
-  const storefront = createStorefrontClient();
+  const storefront = getStorefrontClient();
   const category = await storefront.categories.getById(Number(id), {
     limit: PAGE_SIZE,
     offset,

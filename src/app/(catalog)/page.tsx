@@ -1,4 +1,4 @@
-import { createStorefrontClient } from "@/lib/storefront";
+import { getStorefrontClient } from "@/lib/storefront";
 import { firstValue } from "@/lib/search-params";
 import { ProductCard } from "@/components/product-card";
 import { PaginationNav } from "@/components/pagination-nav";
@@ -92,7 +92,7 @@ export default async function HomePage(props: PageProps<"/">) {
   const offset = (page - 1) * PAGE_SIZE;
   const sort = filters.sort ? SORT_OPTIONS[filters.sort] : undefined;
 
-  const storefront = createStorefrontClient();
+  const storefront = getStorefrontClient();
   const [products, categories, brands] = await Promise.all([
     storefront.products.list({
       q: filters.q,

@@ -8,8 +8,7 @@ import {
   EmbeddedCheckout,
   EmbeddedCheckoutProvider,
 } from "@stripe/react-stripe-js";
-import { createStorefrontClient } from "@/lib/storefront";
-import { getStoredCartToken } from "@/lib/cart-token";
+import { getStorefrontClient } from "@/lib/storefront";
 
 type Config = { ready: boolean; stripeAccountId: string | null; cartEmpty: boolean };
 
@@ -18,7 +17,7 @@ export default function CheckoutPage() {
   const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
-    const storefront = createStorefrontClient(getStoredCartToken());
+    const storefront = getStorefrontClient();
     Promise.all([storefront.checkout.getConfig(), storefront.cart.get()])
       .then(([checkoutConfig, cart]) => {
         setConfig({
@@ -40,7 +39,7 @@ export default function CheckoutPage() {
   }, [config]);
 
   const fetchClientSecret = useCallback(async () => {
-    const storefront = createStorefrontClient(getStoredCartToken());
+    const storefront = getStorefrontClient();
     // createSession throws ApiError with the server's real message on
     // failure — no need to check for a falsy session
     const session = await storefront.checkout.createSession({
@@ -54,7 +53,7 @@ export default function CheckoutPage() {
   // option into real carrier rates
   const onShippingDetailsChange = useCallback(
     async (event: StripeEmbeddedCheckoutShippingDetailsChangeEvent) => {
-      const storefront = createStorefrontClient(getStoredCartToken());
+      const storefront = getStorefrontClient();
       const { name, address } = event.shippingDetails;
       const result = await storefront.checkout.getShippingOptions({
         checkoutSessionId: event.checkoutSessionId,
