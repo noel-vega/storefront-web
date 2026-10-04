@@ -28,7 +28,7 @@ See `.env.example`. You need:
 
 ## Structure
 
-- `src/app/page.tsx` — product listing (Server Component; calls storefront-api server-to-server, no CORS involved).
+- `src/app/(catalog)/page.tsx` — product listing (Server Component; calls storefront-api server-to-server, no CORS involved).
 - `src/app/products/[id]/page.tsx` — product detail + variant picker.
 - `src/app/cart/page.tsx` — cart contents, quantity/remove/clear (Client Component; calls storefront-api directly from the browser).
 - `src/app/checkout/page.tsx` — Stripe Embedded Checkout.

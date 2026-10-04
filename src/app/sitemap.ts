@@ -2,12 +2,12 @@ import type { MetadataRoute } from "next";
 import { getStorefrontClient } from "@/lib/storefront";
 
 // storefront-api's own max page size (see FILTER_OPTIONS_LIMIT in
-// src/app/page.tsx) — use it to walk each resource in as few requests as
+// src/app/(catalog)/page.tsx) — use it to walk each resource in as few requests as
 // possible.
 const PAGE_SIZE = 100;
 
 // Per-tenant, live data — same reasoning as the dynamic = "force-dynamic"
-// pages (src/app/page.tsx): the catalog isn't knowable at build time.
+// pages (src/app/(catalog)/page.tsx): the catalog isn't knowable at build time.
 export const dynamic = "force-dynamic";
 
 async function collectAllIds(
