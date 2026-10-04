@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import type { Cart } from "@ordersail/storefront-sdk";
-import { createStorefrontClient } from "@/lib/storefront";
-import { getStoredCartToken, setStoredCartToken } from "@/lib/cart-token";
+import { getStorefrontClient } from "@/lib/storefront";
+import { setStoredCartToken } from "@/lib/cart-token";
 import { formatPrice } from "@/lib/format";
 
 export default function CartPage() {
@@ -14,7 +14,7 @@ export default function CartPage() {
 
   const refresh = useCallback(async () => {
     try {
-      const storefront = createStorefrontClient(getStoredCartToken());
+      const storefront = getStorefrontClient();
       const result = await storefront.cart.get();
       setCart(result ?? null);
       setLoadError(false);
@@ -25,7 +25,7 @@ export default function CartPage() {
 
   useEffect(() => {
     let ignore = false;
-    createStorefrontClient(getStoredCartToken())
+    getStorefrontClient()
       .cart.get()
       .then((result) => {
         if (!ignore) setCart(result ?? null);
@@ -41,7 +41,7 @@ export default function CartPage() {
   async function updateQuantity(variantId: number, quantity: number) {
     setActionError(null);
     try {
-      const storefront = createStorefrontClient(getStoredCartToken());
+      const storefront = getStorefrontClient();
       if (quantity <= 0) {
         await storefront.cart.removeItem(variantId);
       } else {
@@ -57,7 +57,7 @@ export default function CartPage() {
   async function clear() {
     setActionError(null);
     try {
-      const storefront = createStorefrontClient(getStoredCartToken());
+      const storefront = getStorefrontClient();
       await storefront.cart.clear();
       setStoredCartToken(storefront.cartToken);
       await refresh();

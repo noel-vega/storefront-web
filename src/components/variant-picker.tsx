@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ProductDetailVariant } from "@ordersail/storefront-sdk";
-import { createStorefrontClient } from "@/lib/storefront";
-import { getStoredCartToken, setStoredCartToken } from "@/lib/cart-token";
+import { getStorefrontClient } from "@/lib/storefront";
+import { setStoredCartToken } from "@/lib/cart-token";
 import { formatPrice } from "@/lib/format";
 
 function variantLabel(variant: ProductDetailVariant): string {
@@ -29,7 +29,7 @@ export function VariantPicker({
     if (!variantId) return;
     setStatus("adding");
     try {
-      const storefront = createStorefrontClient(getStoredCartToken());
+      const storefront = getStorefrontClient();
       await storefront.cart.addItem({ variantId, quantity: 1 });
       setStoredCartToken(storefront.cartToken);
       router.push("/cart");

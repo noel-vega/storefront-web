@@ -3,8 +3,8 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { createStorefrontClient } from "@/lib/storefront";
-import { getStoredCartToken, setStoredCartToken } from "@/lib/cart-token";
+import { getStorefrontClient } from "@/lib/storefront";
+import { setStoredCartToken } from "@/lib/cart-token";
 
 // - complete    : paid — the order is on its way (a webhook creates it)
 // - unconfirmed : checkout finished but the payment hasn't settled (a
@@ -43,7 +43,7 @@ function CheckoutReturnContent() {
   useEffect(() => {
     if (!sessionId) return;
     let ignore = false;
-    const storefront = createStorefrontClient(getStoredCartToken());
+    const storefront = getStorefrontClient();
     storefront.checkout
       .getSessionStatus(sessionId)
       .then((result) => {

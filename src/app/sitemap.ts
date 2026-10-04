@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { createStorefrontClient } from "@/lib/storefront";
+import { getStorefrontClient } from "@/lib/storefront";
 
 // storefront-api's own max page size (see FILTER_OPTIONS_LIMIT in
 // src/app/(catalog)/page.tsx) — use it to walk each resource in as few requests as
@@ -29,7 +29,7 @@ async function collectAllIds(
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!;
-  const storefront = createStorefrontClient();
+  const storefront = getStorefrontClient();
 
   const [productIds, categoryIds, brandIds] = await Promise.all([
     collectAllIds(storefront.products.list),

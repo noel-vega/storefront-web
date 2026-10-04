@@ -3,7 +3,7 @@ const REFRESH_TOKEN_CHANGED_EVENT = "refresh-token-changed";
 
 // Only ever called from Client Components, but guarded anyway since this
 // module can still be evaluated during the server render of a page that
-// imports it (see createStorefrontClient in storefront.ts).
+// imports it (see getStorefrontClient in storefront.ts).
 export function getStoredRefreshToken(): string | undefined {
   if (typeof window === "undefined") return undefined;
   return localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY) ?? undefined;
